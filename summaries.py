@@ -4,33 +4,35 @@ from mmr import MMRSelector
 from textrank import textrank_selection
 from preprocess import VietnamesePreprocessor
 
-class summaries:
-    def __init__(self, documents):
-        
-        self.documents = documents
-    
-    def get_documents(self):
-        return self.documents
-    
-    def summarize(self, top_k=5, diversity=0.7, textrank_k=20):
 
-        if not isinstance(self.documents, str):
+
+class summaries:
+    # def __init__(self, documents):
+        
+    #     self.documents = documents
+    
+    def get_documents(doc):
+        return doc
+    
+    def summarize(doc, top_k=5, diversity=0.7, textrank_k=20):
+
+        if not isinstance(doc, str):
             return "Nhập văn bản đầu vào là chuỗi ký tự."
         
-        if len(self.documents.split()) >= 1500:
-            return "Nhiều quá 1000 từ, vui lòng rút gọn văn bản đầu vào."
+        # if len(doc.split()) >= 1000:
+        #     return "Nhiều quá 1000 từ, vui lòng rút gọn văn bản đầu vào."
         
-        if len(self.documents.strip()) == 0:
+        if len(doc.strip()) == 0:
             return "Rỗng"
         
         preprc = VietnamesePreprocessor()
-        self.documents = preprc.process_document(self.documents)
+        doc = preprc.process_document(doc)
         
         emb_model = EmbeddingModel()
         ce_model = crossencoder()
         mmr_selector = MMRSelector(top_k=top_k, diversity=diversity)
     
-        sents, embs = emb_model.embed_text(self.documents)
+        sents, embs = emb_model.embed_text(doc)
         
 
         textrank = textrank_selection(embs, textrank_k)
@@ -57,7 +59,7 @@ class summaries:
         ce_scores = ce_model.rank_sentences(doc_texts, positional_candidates)
 
 
-        doc_emb = emb_model.model.encode([self.documents])[0]
+        doc_emb = emb_model.model.encode([doc])[0]
 
         selected_idx = mmr_selector.select(candidate_embs, doc_emb, ce_scores=ce_scores)
         chosen_global_idxs = [rank[i] for i in selected_idx]
